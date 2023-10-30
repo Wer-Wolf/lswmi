@@ -1,0 +1,100 @@
+[project]
+name = "lswmi"
+version = "1.0.0"
+description = "Utility to retrieve information about WMI devices on Linux"
+requires-python = ">=3.11"
+keywords = [
+    "ACPI",
+    "WMI"
+]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: System :: Hardware",
+    "Topic :: Utilities",
+    "Typing :: Typed"
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[[project.authors]]
+name = "Armin Wolf"
+email = "W_Armin@gmx.de"
+
+[project.urls]
+Repository = "https://github.com/Wer-Wolf/lswmi"
+Bugtracker = "https://github.com/Wer-Wolf/lswmi/issues"
+
+[project.scripts]
+lswmi = "lswmi.main:main_cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.envs.test]
+dependencies = [
+    "coverage[toml] == 7.*"
+]
+
+[tool.hatch.envs.test.scripts]
+test = "python -m unittest discover {args}"
+cov-run = "coverage run -m unittest discover {args}"
+cov-report = [
+    "- coverage combine",
+    "coverage report"
+]
+cov = [
+    "cov-run",
+    "cov-report"
+]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.11", "3.12"]
+
+[tool.hatch.envs.lint]
+dependencies = [
+    "mypy >= 1.0.0",
+    "pylint >= 2.12.2",
+    "flake8 >= 5.0.0",
+    "isort >= 5.10.1"
+]
+
+[tool.hatch.envs.lint.scripts]
+lint = [
+    "- flake8 src/lswmi",
+    "- pylint src/lswmi"
+]
+typecheck = "mypy -p lswmi"
+release = [
+    "typecheck"
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/.github"]
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_any_unimported = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+
+
+[tool.pylint]
+max-line-length = 100
+
+[tool.coverage.run]
+source_pkgs = ["lswmi"]
+branch = true
+parallel = true
