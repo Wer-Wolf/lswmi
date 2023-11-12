@@ -1,0 +1,50 @@
+name: Tests
+
+on: [push, workflow_dispatch]
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: |
+          3.11
+          3.12
+
+    - name: Install Hatch
+      run: python -m pip install hatch
+    
+    - name: Perform release check
+      run: hatch run lint:release
+
+    - name: Run tests
+      run: hatch run test:cov --verbose
+
+    - name: Generate report
+      run: hatch env run -e test.py3.12 coverage xml
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        flags: ${{ runner.os }}
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Build wheel
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      run: hatch build
+
+    - name: Publish package
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        verbose: true
+        skip_existing: true
