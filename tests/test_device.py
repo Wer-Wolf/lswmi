@@ -132,3 +132,13 @@ class WmiDeviceTest(TestCase):
         self.assertIn(self.ddv_device.path, devices)
         self.assertIn(self.eeepc_device.path, devices)
         self.assertEqual(len(devices), 4)
+
+    def test_detection_nondir(self) -> None:
+        """Test if device detection ignores files"""
+        create_file(
+            self.device_path / '05901221-D566-11D1-B2F0-00A0C9062910-2',
+            'dummy'
+        )
+
+        with self.subTest("Device detection did not ignore file"):
+            self.test_detection()
