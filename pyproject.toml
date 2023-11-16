@@ -1,6 +1,6 @@
 [project]
 name = "lswmi"
-version = "1.0.0"
+version = "1.0.1"
 description = "Utility to retrieve information about WMI devices on Linux"
 requires-python = ">=3.11"
 keywords = [
