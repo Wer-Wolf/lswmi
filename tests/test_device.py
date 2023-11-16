@@ -20,15 +20,16 @@ def create_wmi_device(device: WMIDevice) -> None:
     device_dir.mkdir(mode=0o755)
 
     create_file((device_dir / 'guid'), device.guid)
-    create_file((device_dir / 'expensive'), int(device.expensive))
-    create_file((device_dir / 'instance_count'), device.instances)
+    create_file((device_dir / 'expensive'), str(int(device.expensive)))
+    create_file((device_dir / 'instance_count'), str(device.instances))
 
     if device.device_type == WMIDeviceType.EVENT:
         create_file((device_dir / 'notify_id'), device.device_id)
     else:
         create_file((device_dir / 'object_id'), device.device_id)
-        if device.device_type == WMIDeviceType.DATABLOCK:
-            create_file((device_dir / 'setable'), int(device.setable))
+
+    if device.setable is not None:
+        create_file((device_dir / 'setable'), str(int(device.setable)))
 
     if device.driver is not None:
         (device_dir / 'driver').symlink_to(f'../../drivers/{device.driver}')
@@ -37,7 +38,7 @@ def create_wmi_device(device: WMIDevice) -> None:
 class WmiDeviceTest(TestCase):
     """Tests for WMI device handling"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Prepare fake WMI bus directory"""
         bus_path = Path(self.enterContext(TemporaryDirectory()))
         self.device_path = bus_path / 'devices'
@@ -125,7 +126,7 @@ class WmiDeviceTest(TestCase):
 
     def test_detection(self) -> None:
         """Test detection of all WMI devices"""
-        devices = list(wmi_bus_devices(self.device_path.as_posix()))
+        devices = list(wmi_bus_devices(self.device_path))
 
         self.assertIn(self.bmof_device.path, devices)
         self.assertIn(self.bmof_device_duplicate.path, devices)
