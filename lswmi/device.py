@@ -19,10 +19,13 @@ class WMIDeviceType(StrEnum):
 
 def wmi_bus_devices(bus_path: Path = Path('/sys/bus/wmi/devices')) -> Iterable[Path]:
     """Scan for WMI devices on the WMI bus"""
-    with scandir(bus_path) as directory:
-        for entry in directory:
-            if entry.is_dir():
-                yield Path(entry.path)
+    try:
+        with scandir(bus_path) as directory:
+            for entry in directory:
+                if entry.is_dir():
+                    yield Path(entry.path)
+    except FileNotFoundError:
+        pass
 
 
 @dataclass(frozen=True, slots=True)

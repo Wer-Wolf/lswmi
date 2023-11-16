@@ -142,3 +142,9 @@ class WmiDeviceTest(TestCase):
 
         with self.subTest("Device detection did not ignore file"):
             self.test_detection()
+
+    def test_detection_nonbus(self) -> None:
+        """Test if device detection handles absence of the WMI bus"""
+        devices = list(wmi_bus_devices(self.device_path / 'fake'))
+
+        self.assertEqual(len(devices), 0)
