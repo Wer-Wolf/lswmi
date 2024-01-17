@@ -67,8 +67,8 @@ dependencies = [
 
 [tool.hatch.envs.lint.scripts]
 lint = [
-    "- flake8 src/lswmi",
-    "- pylint src/lswmi"
+    "- flake8 lswmi",
+    "- pylint lswmi"
 ]
 typecheck = "mypy -p lswmi"
 release = [
