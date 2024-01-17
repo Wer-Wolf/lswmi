@@ -3,7 +3,7 @@
 """CLI entrypoint utilities"""
 
 from argparse import ArgumentParser, Namespace
-from typing import Final
+from typing import Final, Iterable
 from . import __doc__ as description, __version__
 from .device import WMIDevice, wmi_bus_devices
 
@@ -29,6 +29,12 @@ ARGUMENT_PARSER.add_argument(
     action="store_true",
     help="enable verbose output"
 )
+ARGUMENT_PARSER.add_argument(
+    "-g",
+    "--guid",
+    action="store",
+    help="show only devices with the specified GUID"
+)
 
 
 def print_device_summary(device: WMIDevice) -> None:
@@ -47,8 +53,8 @@ def print_device_verbose(device: WMIDevice) -> None:
         print(f'    Driver: {device.driver}')
 
 
-def main(args: Namespace) -> int:
-    """Entrypoint for the ePPID tool"""
+def wmi_devices() -> Iterable[WMIDevice]:
+    """Scan for WMI devices"""
     for path in wmi_bus_devices():
         try:
             device = WMIDevice.from_sysfs(path)
@@ -56,6 +62,16 @@ def main(args: Namespace) -> int:
             print(f'Unable to read WMI device: {error}')
             continue
 
+        yield device
+
+
+def main(args: Namespace) -> int:
+    """Entrypoint for the ePPID tool"""
+    devices = wmi_devices()
+    if args.guid is not None:
+        devices = filter(lambda d: d.guid == args.guid, devices)
+
+    for device in devices:
         print_device_summary(device)
         if args.verbose:
             print_device_verbose(device)
