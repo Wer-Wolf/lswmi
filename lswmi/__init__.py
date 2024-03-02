@@ -7,6 +7,5 @@ __author__ = "Armin Wolf"
 __email__ = "W_Armin@gmx.de"
 __all__ = (
     "device",
-    "provider",
     "main"
 )
