@@ -92,3 +92,18 @@ class WMIDevice:
             driver=driver,
             path=path
         )
+
+    def get_acpi_path(self) -> str:
+        """Get path of the ACPI method associated with this WMI device"""
+        device_path = self.path.resolve() / '..' / 'device'
+
+        with (device_path / 'firmware_node' / 'path').open('r', encoding='ascii') as fd:
+            acpi_path = fd.read().rstrip()
+
+            match self.device_type:
+                case WMIDeviceType.METHOD:
+                    return f'{acpi_path}.WM{self.device_id}'
+                case WMIDeviceType.DATABLOCK:
+                    return f'{acpi_path}.WQ{self.device_id}'
+                case WMIDeviceType.EVENT:
+                    return f'{acpi_path}._WED'

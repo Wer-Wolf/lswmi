@@ -44,7 +44,12 @@ def print_device_summary(device: WMIDevice) -> None:
 
 def print_device_verbose(device: WMIDevice) -> None:
     """Print additional WMI device information"""
-    print(f'    Identification: {device.device_id}')
+    try:
+        print(f'    Identification: {device.device_id} -> {device.get_acpi_path()}')
+    except FileNotFoundError as error:
+        print(f'    Unable to get ACPI path: {error}')
+        print(f'    Identification: {device.device_id}')
+
     print(f'    Expensive: {device.expensive}')
     if device.setable is not None:
         print(f'    Setable: {device.setable}')

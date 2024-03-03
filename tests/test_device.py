@@ -149,3 +149,39 @@ class WmiDeviceTest(TestCase):
         devices = list(wmi_bus_devices(self.device_path / 'fake'))
 
         self.assertEqual(len(devices), 0)
+
+    def test_acpi_path(self) -> None:
+        """Test ACPI path retrieval"""
+        # Necessary to fake the full platform device hierarchy
+        firmware_path = self.device_path / 'device' / 'firmware_node'
+        firmware_path.mkdir(mode=0o777, parents=True)
+        create_file(firmware_path / 'path', '\\AWW0')
+
+        with self.subTest("Data Block"):
+            device = WMIDevice.from_sysfs(
+                self.device_path / '05901221-D566-11D1-B2F0-00A0C9062910'
+            )
+
+            self.assertEqual(device.get_acpi_path(), f'\\AWW0.WQ{device.device_id}')
+
+        with self.subTest("Message Block"):
+            device = WMIDevice.from_sysfs(
+                self.device_path / '8A42EA14-4F2A-FD45-6422-0087F7A7E608'
+            )
+
+            self.assertEqual(device.get_acpi_path(), f'\\AWW0.WM{device.device_id}')
+
+        with self.subTest("Event Block"):
+            device = WMIDevice.from_sysfs(
+                self.device_path / 'ABBC0F72-8EA1-11D1-00A0-C90629100000'
+            )
+
+            self.assertEqual(device.get_acpi_path(), '\\AWW0._WED')
+
+    def test_acpi_path_missing(self) -> None:
+        """Test if ACPI path retrieval fails when absent"""
+        device = WMIDevice.from_sysfs(
+            self.device_path / '05901221-D566-11D1-B2F0-00A0C9062910'
+        )
+
+        self.assertRaises(FileNotFoundError, device.get_acpi_path)
